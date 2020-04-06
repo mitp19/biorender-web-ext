@@ -1,0 +1,15 @@
+{
+    "name": "BioRender Wall of Love",
+    "version": "1.0",
+    "description": "Build an Extension!",
+    "manifest_version": 2,
+    "content_scripts": [
+    {
+        "matches": [
+            "https://biorender.com/testimonials/*"
+        ],
+        "run_at": "document_end",
+        "js": ["content.js"],
+        "css": ["styles.css"]
+    }]
+}
