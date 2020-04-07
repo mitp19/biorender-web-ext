@@ -1,5 +1,7 @@
 const targetNode = document.querySelector('body');
-const config = { attributes: true, childList: true, subtree: true };
+
+
+// Add lightbox with display none.
 createImageBox();
 
 // Callback function to execute when mutations are observed
@@ -14,14 +16,14 @@ const callback = function(mutationsList, observer) {
         }
         if (mutation.type == "attributes" && mutation.target.id == "twitter-widget-53") {
             addImageModals();
-
         }
     }
 };
 
+// Setting up observer:
+const config = { attributes: true, childList: true, subtree: true };
 // Create an observer instance linked to the callback function
 const observer = new MutationObserver(callback);
-
 // Start observing the target node for configured mutations
 observer.observe(targetNode, config);
 
@@ -34,20 +36,15 @@ function addImageModals() {
                 addEventListToAnchors(div);
             }
             else {
-                console.log("SECONDARY");
                 div = document.querySelector(`#${tweet.id}`).shadowRoot.querySelector(`#${tweet.id} > div > div > blockquote > div.Tweet-body.e-entry-content > div.Tweet-card > div > a > div.QuotedTweet-media > article > div`)
                 if (div) {
                     let anchorRemove = document.querySelector(`#${tweet.id}`).shadowRoot.querySelector(`#${tweet.id} > div > div > blockquote > div.Tweet-body.e-entry-content > div.Tweet-card > div > a`);
+                    
                     anchorRemove.href = "#";
                     anchorRemove.onclick = function(e) {
                         e.preventDefault()
                     }
-                    console.log(div);
-                    let anchors = div.getElementsByTagName("a");
-                    for (let anchor of anchors) {
-                        console.log(anchor);
-                    }
-                    // addEventListToAnchors(div);
+                    addEventListToEmbeddedImages(div)
                 }
             }
         }
@@ -61,23 +58,25 @@ function addImageModals() {
 function addEventListToAnchors(div) {
     let anchors = div.getElementsByTagName("a");
     for (let anchor of anchors) {
-        anchor.href = "#";
-        anchor.onclick = function(e) {
-            e.preventDefault();
+        if (anchor.getElementsByTagName("img")[0]) {
             let img = anchor.getElementsByTagName("img")[0];
-            let url = new URL(img.src);
-            let newSrc = `${url.origin}${url.pathname}?format=jpg`
-            triggerModal(newSrc);
-            return false;
+            if (!img.src.includes("tweet_video")) {
+                anchor.href = "#";
+                anchor.onclick = function(e) {
+                    e.preventDefault();
+                    let url = new URL(img.src);
+                    let newSrc = `${url.origin}${url.pathname}?format=jpg`
+                    triggerModal(newSrc);
+                    return false;
+                }
+            }
         }
+
     }
 }
 
 
 function triggerModal(newSrc) {
-    console.log("trigger modal function", newSrc);
-    let overlay = document.querySelector('.overlayContainer');
-    let largeImage = document.querySelector('.largeImage');
     lightbox(newSrc, newSrc)
 }
 
@@ -121,6 +120,14 @@ function lightbox(href, alt) {
   }
 
 
-  function addEventListToEmbeddedImages() {
-
+  function addEventListToEmbeddedImages(div) {
+    let images = div.getElementsByTagName("img");
+    for (let image of images) {
+        image.onclick = function(e) {
+            e.preventDefault();
+            let url = new URL(image.src);
+            let newSrc = `${url.origin}${url.pathname}?format=jpg`
+            triggerModal(newSrc);
+        }
+    }
   }
